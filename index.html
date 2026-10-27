@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#111827">
+<title>Halloween da Família Estendida — Foto com Moldura</title>
+<style>
+:root{color-scheme:light;--bg:#f3f4f6;--ink:#111827;--muted:#6b7280;--accent:#6d28d9}
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--ink)}
+header{background:#171023;color:white;padding:20px 16px;text-align:center}header h1{font-size:1.25rem;margin:0 0 5px}header p{margin:0;color:#ddd6fe;font-size:.9rem}
+main{width:min(100% - 24px,760px);margin:16px auto 32px}.card{background:white;border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 2px 10px #1118270d}
+h2{font-size:1.03rem;margin:0 0 12px}.hint{font-size:.88rem;line-height:1.45;color:var(--muted);margin:8px 0 0}
+.row{display:flex;flex-wrap:wrap;gap:9px}button,.label{appearance:none;border:0;border-radius:11px;padding:12px 14px;min-height:45px;font-weight:650;font-size:.94rem;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;text-align:center}
+button.primary{background:var(--accent);color:white}button.secondary,.label{background:#e5e7eb;color:#111827}button:disabled{opacity:.45;cursor:not-allowed}.row button,.row .label{flex:1 1 140px}
+input[type=file]{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);clip-path:inset(50%)}
+.templates{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.template{border:2px solid transparent;border-radius:12px;padding:6px;background:#f9fafb;text-align:center;cursor:pointer;color:#111827}.template.selected{border-color:#7c3aed;background:#f5f3ff}.template img{width:100%;height:190px;object-fit:contain;display:block;border-radius:7px}.template span{display:block;font-size:.85rem;font-weight:650;padding:7px 2px 3px}
+.stage{background:#171023;border-radius:14px;overflow:hidden;min-height:220px;display:flex;align-items:center;justify-content:center}
+video{display:block;width:100%;max-height:65vh;object-fit:contain;background:#171023}canvas{display:block;width:100%;max-height:72vh;object-fit:contain}.empty{color:#e5e7eb;text-align:center;padding:28px 18px;line-height:1.5}
+.status{padding:10px 12px;border-radius:10px;background:#f5f3ff;color:#5b21b6;font-size:.9rem;line-height:1.4;margin-top:12px}.status.error{background:#fef2f2;color:#b91c1c}.hidden{display:none!important}
+footer{text-align:center;color:var(--muted);font-size:.8rem;padding:0 18px 26px}
+@media(min-width:560px){.templates{grid-template-columns:repeat(3,minmax(0,1fr))}.template img{height:220px}}
+</style>
+</head>
+<body>
+<header><h1>🎃 Halloween da Família Estendida</h1><p>Foto com as molduras originais que você enviou</p></header>
+<main>
+<section class="card">
+<h2>1. Escolha uma moldura original</h2>
+<div class="templates" id="templates">
+<button class="template selected" data-frame="0"><img src="molduras/moldura_1_pergaminho.jpeg" alt="Moldura pergaminho"><span>1. Pergaminho</span></button>
+<button class="template" data-frame="1"><img src="molduras/moldura_2_monstros.jpeg" alt="Moldura monstros coloridos"><span>2. Monstros coloridos</span></button>
+<button class="template" data-frame="2"><img src="molduras/moldura_3_lua_morcegos.jpeg" alt="Moldura lua e morcegos"><span>3. Lua e morcegos</span></button>
+<button class="template" data-frame="3"><img src="molduras/moldura_4_gotica_cenario.jpeg" alt="Moldura gótica com cenário"><span>4. Gótica com cenário</span></button>
+<button class="template" data-frame="4"><img src="molduras/moldura_5_gotica_preta.jpeg" alt="Moldura gótica preta"><span>5. Moldura gótica preta</span></button>
+</div>
+<p class="hint">As molduras são os arquivos originais enviados. O sistema não redesenha nem recria seus textos, cores ou decorações. A foto ocupa somente a área central configurada para cada modelo.</p>
+</section>
+<section class="card">
+<h2>2. Tire a foto</h2>
+<div class="row"><button id="startBtn" class="primary">Abrir câmera</button><button id="switchBtn" class="secondary" disabled>Trocar câmera</button></div>
+<div class="stage" style="margin-top:12px"><div id="cameraEmpty" class="empty">Toque em “Abrir câmera” e permita o acesso à câmera.</div><video id="video" class="hidden" autoplay playsinline muted></video></div>
+<div class="row" style="margin-top:12px"><button id="captureBtn" class="primary" disabled>Tirar foto</button><label class="label" for="photoInput">Escolher foto existente</label><input id="photoInput" type="file" accept="image/*"></div>
+<p class="hint">Use “Trocar câmera” para alternar entre a frontal e a traseira do iPhone.</p>
+</section>
+<section class="card">
+<h2>3. Confira e salve</h2>
+<div class="stage"><div id="resultEmpty" class="empty">A foto com a moldura aparecerá aqui.</div><canvas id="resultCanvas" class="hidden"></canvas></div>
+<div class="row" style="margin-top:12px"><button id="downloadBtn" class="primary" disabled>Salvar imagem</button><button id="retakeBtn" class="secondary" disabled>Limpar resultado</button></div>
+<p class="hint">No iPhone, se a imagem não for salva diretamente em Fotos, abra o arquivo baixado e use Compartilhar → Salvar Imagem.</p>
+</section>
+<div id="status" class="status" role="status" aria-live="polite">Escolha uma moldura e abra a câmera.</div>
+</main>
+<footer>As fotos são processadas localmente no navegador e não são enviadas para um servidor.</footer>
+<script>
+(() => {
+  const frameFiles = [
+    'molduras/moldura_1_pergaminho.jpeg',
+    'molduras/moldura_2_monstros.jpeg',
+    'molduras/moldura_3_lua_morcegos.jpeg',
+    'molduras/moldura_4_gotica_cenario.jpeg',
+    'molduras/moldura_5_gotica_preta.jpeg'
+  ];
+  // Retângulos normalizados (x, y, largura, altura) da área destinada à foto.
+  // Coordenadas relativas à imagem original; podem ser refinadas após um teste com uma foto.
+  const windows = [
+    {x:0.163,y:0.285,w:0.676,h:0.558}, // pergaminho
+    {x:0.160,y:0.322,w:0.681,h:0.546}, // monstros coloridos
+    {x:0.155,y:0.260,w:0.690,h:0.510}, // lua e morcegos
+    {x:0.190,y:0.235,w:0.620,h:0.535}, // gótica com cenário
+    {x:0.245,y:0.205,w:0.510,h:0.635}  // gótica preta
+  ];
+  const $ = id => document.getElementById(id);
+  const video=$('video'), cameraEmpty=$('cameraEmpty'), resultCanvas=$('resultCanvas');
+  const ctx=resultCanvas.getContext('2d');
+  let selected=0, frameImage=null, stream=null, facing='user', photo=null, frameUrl=null;
+  function say(msg,err=false){$('status').textContent=msg;$('status').classList.toggle('error',err)}
+  function update(){ $('captureBtn').disabled=!stream; $('switchBtn').disabled=!stream; $('downloadBtn').disabled=!photo; $('retakeBtn').disabled=!photo; }
+  function loadImage(url){return new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=()=>reject(new Error('Não foi possível carregar a moldura '+url));im.src=url})}
+  async function chooseFrame(i){
+    selected=i;
+    document.querySelectorAll('.template').forEach((b,n)=>b.classList.toggle('selected',n===i));
+    try{
+      frameImage=await loadImage(frameFiles[i]);
+      if(photo) compose();
+      say('Moldura '+(i+1)+' selecionada. O layout original será preservado.');
+    }catch(e){say(e.message,true)}
+  }
+  document.querySelectorAll('.template').forEach(b=>b.addEventListener('click',()=>chooseFrame(Number(b.dataset.frame))));
+  async function startCamera(){
+    if(!navigator.mediaDevices?.getUserMedia){say('A câmera requer Safari atualizado e página publicada em HTTPS.',true);return}
+    stopCamera();
+    try{
+      stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:facing},width:{ideal:1920},height:{ideal:1080}}});
+      video.srcObject=stream;video.classList.remove('hidden');cameraEmpty.classList.add('hidden');await video.play();
+      $('startBtn').textContent='Reabrir câmera';update();say(facing==='user'?'Câmera frontal ativa.':'Câmera traseira ativa.');
+    }catch(e){stream=null;update();say(e.name==='NotAllowedError'?'Acesso à câmera negado. Permita o uso da câmera nas configurações do Safari.':'Não foi possível abrir a câmera. Verifique HTTPS e as permissões do navegador.',true)}
+  }
+  function stopCamera(){if(stream)stream.getTracks().forEach(t=>t.stop());stream=null;if(video)video.srcObject=null;update()}
+  $('startBtn').addEventListener('click',startCamera);
+  $('switchBtn').addEventListener('click',()=>{facing=facing==='user'?'environment':'user';startCamera()});
+  $('captureBtn').addEventListener('click',()=>{
+    if(!video.videoWidth)return;
+    const c=document.createElement('canvas');c.width=video.videoWidth;c.height=video.videoHeight;
+    c.getContext('2d').drawImage(video,0,0,c.width,c.height);photo=c;compose();
+  });
+  $('photoInput').addEventListener('change',async e=>{
+    const f=e.target.files?.[0];if(!f)return;
+    try{const url=URL.createObjectURL(f);const im=await loadImage(url);const c=document.createElement('canvas');c.width=im.naturalWidth;c.height=im.naturalHeight;c.getContext('2d').drawImage(im,0,0);URL.revokeObjectURL(url);photo=c;compose()}catch(err){say('Não foi possível abrir a foto selecionada.',true)}
+  });
+  function cover(ctx,src,sw,sh,dx,dy,dw,dh){
+    const scale=Math.max(dw/sw,dh/sh),cw=dw/scale,ch=dh/scale,sx=(sw-cw)/2,sy=(sh-ch)/2;
+    ctx.drawImage(src,sx,sy,cw,ch,dx,dy,dw,dh);
+  }
+  async function compose(){
+    if(!photo)return;
+    if(!frameImage) await chooseFrame(selected);
+    const fw=frameImage.naturalWidth,fh=frameImage.naturalHeight,w=windows[selected];
+    resultCanvas.width=fw;resultCanvas.height=fh;
+    // Primeiro desenha a imagem original inteira. Depois substitui apenas a área central configurada.
+    ctx.clearRect(0,0,fw,fh);
+    ctx.drawImage(frameImage,0,0,fw,fh);
+    const x=Math.round(w.x*fw),y=Math.round(w.y*fh),ww=Math.round(w.w*fw),hh=Math.round(w.h*fh);
+    ctx.save();
+    ctx.beginPath();ctx.rect(x,y,ww,hh);ctx.clip();
+    cover(ctx,photo,photo.width,photo.height,x,y,ww,hh);
+    ctx.restore();
+    resultCanvas.classList.remove('hidden');$('resultEmpty').classList.add('hidden');update();
+    say('Foto aplicada à área central. Confira se o enquadramento ficou correto antes de salvar.');
+  }
+  $('downloadBtn').addEventListener('click',()=>{
+    if(!photo)return;
+    resultCanvas.toBlob(blob=>{
+      if(!blob){say('Não foi possível gerar a imagem.',true);return}
+      const url=URL.createObjectURL(blob),a=document.createElement('a'),d=new Date(),p=n=>String(n).padStart(2,'0');
+      a.href=url;a.download=`halloween_familia_moldura${selected+1}_${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}.png`;
+      document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);
+      say('Imagem gerada. Se necessário, abra o arquivo baixado e escolha Compartilhar → Salvar Imagem.');
+    },'image/png');
+  });
+  $('retakeBtn').addEventListener('click',()=>{photo=null;resultCanvas.classList.add('hidden');$('resultEmpty').classList.remove('hidden');update();say('Resultado limpo. Tire ou escolha outra foto.')});
+  window.addEventListener('pagehide',stopCamera);
+  chooseFrame(0);
+})();
+</script>
+</body></html>
