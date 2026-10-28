@@ -61,14 +61,14 @@ footer{text-align:center;color:var(--muted);font-size:.8rem;padding:0 18px 26px}
     'molduras/moldura_4_gotica_cenario.jpeg',
     'molduras/moldura_5_gotica_preta.jpeg'
   ];
-  // Retângulos normalizados (x, y, largura, altura) da área destinada à foto.
-  // Todas as cinco molduras têm áreas mais conservadoras para preservar títulos, bordas e rodapés.
+  // Área interna da abertura de cada moldura (x, y, largura, altura), normalizada.
+  // A foto é desenhada primeiro e a moldura original é colocada por cima.
   const windows = [
-    {x:0.175,y:0.315,w:0.650,h:0.515}, // pergaminho — margem interna para não cobrir título/bordas
-    {x:0.175,y:0.355,w:0.650,h:0.475}, // monstros coloridos — abaixo do título e acima do rodapé
-    {x:0.185,y:0.305,w:0.630,h:0.435}, // lua e morcegos — área central reduzida
-    {x:0.225,y:0.285,w:0.550,h:0.455}, // gótica com cenário — dentro do vão central
-    {x:0.285,y:0.295,w:0.430,h:0.485}  // gótica preta — abaixo do título e dentro do arco
+    {x:0.170,y:0.300,w:0.660,h:0.535}, // pergaminho
+    {x:0.170,y:0.355,w:0.660,h:0.475}, // monstros coloridos
+    {x:0.185,y:0.305,w:0.630,h:0.435}, // lua e morcegos
+    {x:0.225,y:0.285,w:0.550,h:0.455}, // gótica com cenário
+    {x:0.285,y:0.295,w:0.430,h:0.485}  // gótica preta
   ];
   const $ = id => document.getElementById(id);
   const video=$('video'), cameraEmpty=$('cameraEmpty'), resultCanvas=$('resultCanvas');
@@ -117,16 +117,27 @@ footer{text-align:center;color:var(--muted);font-size:.8rem;padding:0 18px 26px}
     if(!frameImage) await chooseFrame(selected);
     const fw=frameImage.naturalWidth,fh=frameImage.naturalHeight,w=windows[selected];
     resultCanvas.width=fw;resultCanvas.height=fh;
-    // Primeiro desenha a imagem original inteira. Depois substitui apenas a área central configurada.
-    ctx.clearRect(0,0,fw,fh);
-    ctx.drawImage(frameImage,0,0,fw,fh);
     const x=Math.round(w.x*fw),y=Math.round(w.y*fh),ww=Math.round(w.w*fw),hh=Math.round(w.h*fh);
+
+    // Foto na camada inferior, preenchendo toda a abertura.
+    ctx.clearRect(0,0,fw,fh);
     ctx.save();
     ctx.beginPath();ctx.rect(x,y,ww,hh);ctx.clip();
     cover(ctx,photo,photo.width,photo.height,x,y,ww,hh);
     ctx.restore();
+
+    // Moldura original na camada superior; removemos somente o centro da camada
+    // para que os contornos e sombras da abertura fiquem à frente da fotografia.
+    const overlay=document.createElement('canvas');overlay.width=fw;overlay.height=fh;
+    const octx=overlay.getContext('2d');
+    octx.drawImage(frameImage,0,0,fw,fh);
+    octx.globalCompositeOperation='destination-out';
+    octx.fillRect(x,y,ww,hh);
+    octx.globalCompositeOperation='source-over';
+    ctx.drawImage(overlay,0,0);
+
     resultCanvas.classList.remove('hidden');$('resultEmpty').classList.add('hidden');update();
-    say('Foto aplicada à área central. Confira se o enquadramento ficou correto antes de salvar.');
+    say('Foto encaixada por trás da moldura original. Confira o enquadramento antes de salvar.');
   }
   $('downloadBtn').addEventListener('click',()=>{
     if(!photo)return;
